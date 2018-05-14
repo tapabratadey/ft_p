@@ -1,70 +1,71 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include "libft/libft.h"
+#include "client.h"
+
+int error(char *str)
+{
+    ft_putstr(str);
+    exit(0);
+}
+
+void    client_loop(t_client *client)
+{
+    int gnl;
+    char *line;
+    char buff[1024];
+
+    gnl = 0;
+
+    while (1)
+    {
+        ft_putstr("-> ");
+        gnl = get_next_line(0, &line);
+        if (gnl <= 0)
+            error("Couldn't read\n");
+        send(client->client_socket, line, ft_strlen(line), 0);
+        if ((client->ret_from_server = recv(client->client_socket, buff, 1023, 0)) <= 0)
+            error("Couldn't receive a response from server.\n");
+        printf("Received response from server.\n");
+        buff[client->client_socket] = '\0';
+        printf("%s\n", buff);
+        ft_memset((void**)buff, '\0', ft_strlen(buff));
+        //     get_put(client, line);
+        free(line);
+    }
+}
+
+void    create_client_socket(t_client *client, char *hostname)
+{
+    // struct that deals with internet addresses
+    struct sockaddr_in serv_addr;
+
+    // create a socket
+    client->client_socket = socket(AF_INET, SOCK_STREAM, 0);
+    if (client->client_socket < 0)
+        error("Couldn't create a socket\n");
+    printf("Client socket is created.\n");
+    // fill the structure with null values
+    // ft_memset((void**)&serv_addr, '\0', sizeof(serv_addr));
+    // specify structure values
+    serv_addr.sin_family = AF_INET; //refers to addresses from the internet
+    serv_addr.sin_port = htons(client->port);
+    // converts IPv4 and IPv6 addresses from text to binary form
+    if (inet_pton(AF_INET, hostname, &serv_addr.sin_addr) <= 0)
+        error("Check your address.\n");
+    // connect
+    if ((client->client_connect = connect(client->client_socket, (struct sockaddr*)&serv_addr, sizeof(serv_addr))) < 0)
+        error("Couldn't Connect\n");
+    printf("Connected to Server.\n");
+    client_loop(client);
+}
 
 int main(int argc, char **argv)
 {
-    int client_socket;
-    int ret;
-    struct sockaddr_in server_addr;
+    t_client *client;
 
-    if (argc < 3)
-    {
-        printf("Usage: %s <server> <port>\n", argv[0]);
-        exit(0);
-    }
-    client_socket = socket(AF_INET, SOCK_STREAM, 0);
-    if (client_socket < 0)
-    {
-        ft_putstr("Couldn't connect.\n");
-        exit(0);
-    }
-    ft_putstr("Client socket is created.\n");
-
-    // filling server struct with null values
-    ft_memset((void**)&server_addr, '\0', sizeof(server_addr));
-
-    // specify the struct values
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(ft_atoi(argv[2]));
-    server_addr.sin_addr.s_addr = inet_addr(argv[1]);
-
-    // connect which returns an integer
-    // 1st param- is our socket
-    // 2nd param- cast our server address struct sockadd and pass the address
-    // 3rd param - size of the address use the sizeof();
-    ret = connect(client_socket, (struct sockaddr *)&server_addr, sizeof(server_addr));
-    if (ret < 0)
-    {
-        ft_putstr("Couldn't connect.\n");
-        exit(0);
-    }
-    printf("Connected to the server.\n");
-
-    // infinite while loop until the client wants to disconnect with the server
-   /* while (1)
-    {
-        ft_putstr("Client: ");
-        // sending the message to the server
-        // 1st- sending the client socket
-        // 2nd- the message
-        // 3rd- size of the buffer
-        send(client_socket, buff, ft_strlen(buff), 0);
-
-        if (ft_strcmp(buff, "quit") == 0)
-        {
-            ft_putstr("Disconnected from the server.\n");
-            exit(1);
-        }
-        if (recv(client_socket, buff, sizeof(buff), 0) < 0)
-            ft_putstr("Couldn't receive data.\n");
-        else
-            printf("Server: %s\n", buff);
-    }*/
+    client = (t_client*)malloc(sizeof(t_client));
+    client->port = ft_atoi(argv[2]);
+    if (argc != 3)
+        error("Usage: ./client <host machine> <port>\n");
+    create_client_socket(client, argv[1]);
+    close(client->client_socket);
     return (0);
 }
