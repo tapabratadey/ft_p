@@ -44,7 +44,7 @@ void    server_loop(t_server *server)
 {
     struct sockaddr_in new_addr;
     socklen_t addr_size;
-    pid_t childpid;
+    // pid_t childpid;
     while (1)
     {
         listen(server->server_socket, 10);
@@ -52,10 +52,11 @@ void    server_loop(t_server *server)
             error("Couldn't accept connection.\n");
         printf("Connection accepted.\n");//from %s:%d\n", inet_ntoa(new_addr.sin_addr), ntoa(new_addr.sin_port));
         ft_putstr("hello");
-        if ((childpid = fork()) == 0)
-            close(server->server_socket);
+        // if ((childpid = fork()) == 0)
+        //     close(server->server_socket);
         get_from_client(server);
     }
+    close(server->server_socket);
 }
 
 void create_client_server(t_server *server)
