@@ -1,4 +1,6 @@
 #include "server.h"
+#include <string.h>
+#include <errno.h>
 
 int error(char *str)
 {
@@ -29,12 +31,21 @@ void    get_from_client(t_server *server)
     //server receives the msg
     while (1)
     {
+        // receive what the client sent you
         server->ret_recv = recv(server->server_accept, buff, 1023, 0);
         buff[server->ret_recv] = '\0';
         // if_ls(server, buff);
+
+        // parse it
+        if (ft_strcmp(buff, "ayyy"))
+            printf("buff");
+
         if_quit(buff);
+        //print it out to test
         printf("Clinet: %s\n", buff);
+        //send back to client what you parsed 
         send (server->server_accept, buff, ft_strlen(buff), 0);
+        //empty the buffer out
         ft_bzero(buff, sizeof(buff));
 
     }
@@ -51,7 +62,7 @@ void    server_loop(t_server *server)
         if ((server->server_accept = accept(server->server_socket, (struct sockaddr *)&new_addr, &addr_size)) < 0)
             error("Couldn't accept connection.\n");
         printf("Connection accepted.\n");//from %s:%d\n", inet_ntoa(new_addr.sin_addr), ntoa(new_addr.sin_port));
-        ft_putstr("hello");
+        // ft_putstr("hello");
         // if ((childpid = fork()) == 0)
         //     close(server->server_socket);
         get_from_client(server);
@@ -69,8 +80,11 @@ void create_client_server(t_server *server)
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_addr.s_addr = INADDR_ANY;
     serv_addr.sin_port = htons(server->port);
-    if (bind(server->server_socket, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) == 0)
+    if (bind(server->server_socket, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) == -1)
+    {
+        printf("%s", strerror(errno));
         error("Couldn't bind to port.\n");
+    }
     printf("Connected to port.\n");
     server_loop(server);
 }               

@@ -13,9 +13,10 @@ char *read_user(char *line)
     read_ret = 0;
     while ((read_ret = read(0, buff, 1)) > 0)
     {
-        buff[read_ret] = '\0';
+        buff[1] = '\0';
         line = ft_strjoin(line, buff);
-        if (line)
+        ft_putstr(line);
+        if (line == NULL)
             free (line);
         if (buff[0] == '\n')
             break;
@@ -34,21 +35,29 @@ void client_loop(t_client *client)
 
     while (1)
     {
-        ft_putstr("-> ");
+        // send(client->client_socket, "quit", ft_strlen("quit"), 0);
+        // send(client->client_socket, "ayyy", ft_strlen("ayyy"), 0);
         // gnl = get_next_line(0, &line);
         // ft_putstr(line);
         // if (gnl <= 0)
         //     error("Couldn't read\n");
-
-        line = read_user(line);
-        ft_putstr(line);
         // if (ft_strcmp(line, "quit"))
         //     error("Disconnected.\n");
+
+        // start
+        ft_putstr("-> ");
+        //read
+        line = read_user(line);
+        ft_putstr(line);
+        //send to that line(command) to server
         send(client->client_socket, line, ft_strlen(line), 0);
+        ft_putstr("hello");
+        //receive back what server parsed and sent to you
         if ((client->ret_from_server = recv(client->client_socket, buff, 1023, 0)) <= 0)
             error("Couldn't receive a response from server.\n");
         printf("Received response from server.\n");
-        buff[client->client_socket] = '\0';
+        buff[client->ret_from_server] = '\0';
+        //print it out
         printf("%s\n", buff);
         ft_memset((void **)buff, '\0', ft_strlen(buff));
         //     get_put(client, line);
