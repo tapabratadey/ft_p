@@ -59,7 +59,8 @@ void client_loop(t_client *client)
         buff[client->ret_from_server] = '\0';
         //print it out
         printf("%s\n", buff);
-        ft_memset((void **)buff, '\0', ft_strlen(buff));
+        memset(buff, '\0', ft_strlen(buff));
+        ft_putstr("hello");
         //     get_put(client, line);
         free(line);
     }
