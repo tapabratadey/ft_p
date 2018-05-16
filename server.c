@@ -34,15 +34,12 @@ void    get_from_client(t_server *server)
         // receive what the client sent you
         server->ret_recv = recv(server->server_accept, buff, 1023, 0);
         buff[server->ret_recv] = '\0';
-        // if_ls(server, buff);
 
         // parse it
-        if (ft_strcmp(buff, "ayyy"))
-            printf("buff");
-
+        // if_ls(server, buff);
         if_quit(buff);
         //print it out to test
-        printf("Clinet: %s\n", buff);
+        printf("Client: %s\n", buff);
         //send back to client what you parsed 
         send (server->server_accept, buff, ft_strlen(buff), 0);
         //empty the buffer out
