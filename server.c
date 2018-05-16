@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   server.c                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: tadey <marvin@42.fr>                       +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2018/05/16 15:30:27 by tadey             #+#    #+#             */
+/*   Updated: 2018/05/16 15:30:32 by tadey            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "server.h"
 #include <string.h>
 #include <errno.h>
@@ -13,16 +25,33 @@ int error(char *str)
 
 // }
 
-// void    if_ls(t_server *server, char *buff)
+// void    if_get(t_server *server, char *buff)
 // {
-//     if (ft_strcmp(buff, "ls") == 0)
-//         get_ls(server);
+//     server = NULL;
+//     if (ft_strcmp(buff, "get\n") == 0)
+//         ft_putstr("hey");
 // }
 
-void    if_quit(char *buff)
+// void    if_pwd(t_server *server, char *buff)
+// {
+//     server = NULL;
+//     if (ft_strcmp(buff, "pwd\n") == 0)
+//         ft_putstr("hey");
+// }
+
+// void    if_cd(t_server *server, char *buff)
+// {
+//     server = NULL;
+//     if (ft_strcmp(buff, "cd\n") == 0)
+//         ft_putstr("hey");
+// }
+
+void    if_ls(t_server *server, char *buff)
 {
-    if (ft_strcmp(buff, "quit") == 0)
-        error("Disconnected.\n");
+    if (ft_strcmp(buff, "ls\n") == 0)
+    {
+
+    }
 }
 
 void    get_from_client(t_server *server)
@@ -33,13 +62,20 @@ void    get_from_client(t_server *server)
     {
         // receive what the client sent you
         server->ret_recv = recv(server->server_accept, buff, 1023, 0);
+        printf("Bytes received: %d\n", server->ret_recv);
         buff[server->ret_recv] = '\0';
+        printf("Client command: %s\n", buff);
+        
+        // parse it TODO
+        if_ls(server, buff);
+        // if_cd(server, buff);
+        // if_pwd(server, buff);
+        // if_get(server, buff);
+        // if_put(server, buff);
 
-        // parse it
-        // if_ls(server, buff);
-        if_quit(buff);
         //print it out to test
-        printf("Client: %s\n", buff);
+        // printf("Client: %s\n", buff);
+        
         //send back to client what you parsed 
         send (server->server_accept, buff, ft_strlen(buff), 0);
         //empty the buffer out
@@ -52,16 +88,12 @@ void    server_loop(t_server *server)
 {
     struct sockaddr_in new_addr;
     socklen_t addr_size;
-    // pid_t childpid;
     while (1)
     {
         listen(server->server_socket, 10);
         if ((server->server_accept = accept(server->server_socket, (struct sockaddr *)&new_addr, &addr_size)) < 0)
             error("Couldn't accept connection.\n");
-        printf("Connection accepted.\n");//from %s:%d\n", inet_ntoa(new_addr.sin_addr), ntoa(new_addr.sin_port));
-        // ft_putstr("hello");
-        // if ((childpid = fork()) == 0)
-        //     close(server->server_socket);
+        printf("Connection accepted.\n\n");
         get_from_client(server);
     }
     close(server->server_socket);
@@ -73,7 +105,6 @@ void create_client_server(t_server *server)
     if ((server->server_socket = socket(AF_INET, SOCK_STREAM, 0)) < 0)
         error("Couldn't create a socket.\n");
     printf("Server socket is created.\n");
-    // ft_memset((void**)&serv_addr, '\0', sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_addr.s_addr = INADDR_ANY;
     serv_addr.sin_port = htons(server->port);

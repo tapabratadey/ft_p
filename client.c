@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   client.c                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: tadey <marvin@42.fr>                       +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2018/05/16 15:30:04 by tadey             #+#    #+#             */
+/*   Updated: 2018/05/16 15:30:05 by tadey            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "client.h"
 
 int error(char *str)
@@ -31,37 +43,38 @@ void client_loop(t_client *client)
     int gnl;
     char buff[1024];
 
-    line = NULL;
+    line = ft_strnew(1);
     gnl = 0;
-
     while (1)
     {
-        // send(client->client_socket, "quit", ft_strlen("quit"), 0);
-        // send(client->client_socket, "ayyy", ft_strlen("ayyy"), 0);
-        // ft_putstr(line);
-        // if (ft_strcmp(line, "quit"))
-        //     error("Disconnected.\n");
-
         // start
         ft_putstr("-> ");
-        // gnl = get_next_line(0, &line);
-        // if (gnl <= 0)
-        //     error("Couldn't read\n");
+
         //read
         line = read_user(line);
-        ft_putstr(line);
+        if (ft_strcmp(line, "quit\n") == 0)
+        {
+            close(client->client_socket);
+            ft_putstr("Disconnected.\n");
+            exit(0);
+        }
+
         //send to that line(command) to server
         if (line)
             send(client->client_socket, line, ft_strlen(line), 0);
+        
         //receive back what server parsed and sent to you
         if ((client->ret_from_server = recv(client->client_socket, buff, 1023, 0)) <= 0)
             error("Couldn't receive a response from server.\n");
         printf("Received response from server.\n");
         buff[client->ret_from_server] = '\0';
+        
         //print it out
         // printf("%s\n", buff);
-        memset(buff, '\0', ft_strlen(buff));
-        free(line);
+
+        // reset buff and line
+        ft_bzero(buff, sizeof(buff));
+        ft_bzero(line, sizeof(line));
     }
 }
 
@@ -75,14 +88,18 @@ void create_client_socket(t_client *client, char *hostname)
     if (client->client_socket < 0)
         error("Couldn't create a socket\n");
     printf("Client socket is created.\n");
+    
     // fill the structure with null values
     // ft_memset((void**)&serv_addr, '\0', sizeof(serv_addr));
+    
     // specify structure values
     serv_addr.sin_family = AF_INET; //refers to addresses from the internet
     serv_addr.sin_port = htons(client->port);
+    
     // converts IPv4 and IPv6 addresses from text to binary form
     if (inet_pton(AF_INET, hostname, &serv_addr.sin_addr) <= 0)
         error("Check your address.\n");
+    
     // connect
     if ((client->client_connect = connect(client->client_socket, (struct sockaddr *)&serv_addr, sizeof(serv_addr))) < 0)
         error("Couldn't Connect\n");
