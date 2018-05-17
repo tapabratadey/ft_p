@@ -32,12 +32,6 @@ int error(char *str)
 //         ft_putstr("hey");
 // }
 
-// void    if_pwd(t_server *server, char *buff)
-// {
-//     server = NULL;
-//     if (ft_strcmp(buff, "pwd\n") == 0)
-//         ft_putstr("hey");
-// }
 
 // void    if_cd(t_server *server, char *buff)
 // {
@@ -46,30 +40,45 @@ int error(char *str)
 //         ft_putstr("hey");
 // }
 
-void    if_ls(t_server *server, char *buff)
+// void    if_ls(t_server *server, char *buff)
+// {
+//     if (ft_strcmp(buff, "ls\n") == 0)
+//     {
+//         if (fork() != 0)
+//             close(server->server_accept);
+//         else
+//         {
+//             close(server->server_socket);
+//             //---Map stdin, stdout and stderr to the data connection
+// 				dup2(server->server_accept, 0);
+// 				dup2(server->server_accept, 1);
+// 				dup2(server->server_accept, 2);
+
+// 				//Call external program
+// 				execl("/bin/ls", "/bin/ls", "-al", "/sbin", 0);
+//         }
+
+//     }
+// }
+
+int if_pwd(t_server *server, char *buff)
 {
-    if (ft_strcmp(buff, "ls\n") == 0)
+    char path[MAXPATHLEN];
+    if (ft_strcmp(buff, "pwd\n") == 0)
     {
-        if (fork() != 0)
-            close(server->server_accept);
-        else
-        {
-            close(server->server_socket);
-            //---Map stdin, stdout and stderr to the data connection
-				dup2(server->server_accept, 0);
-				dup2(server->server_accept, 1);
-				dup2(server->server_accept, 2);
-
-				//Call external program
-				execl("/bin/ls", "/bin/ls", "-al", "/sbin", 0);
-        }
-
+        server->pwd = getcwd(path, MAXPATHLEN);
+        if (server->pwd == NULL)
+            return (0);
     }
+    return (1);
 }
 
 void    get_from_client(t_server *server)
 {
     char buff[1024];
+    char *to_client;
+
+    // pwd = ft_strnew(MAXPATHLEN);
     //server receives the msg
     while (1)
     {
@@ -79,20 +88,26 @@ void    get_from_client(t_server *server)
         buff[server->ret_recv] = '\0';
         printf("Client command: %s\n", buff);
         
-        // parse it TODO
-        if_ls(server, buff);
+        // parse it -TODO-
+        if (if_pwd(server, buff) == 1)
+        {
+            to_client = ft_strdup(server->pwd);
+            to_client = ft_strjoin(to_client, "\nSUCCESS");
+        }
+        // if_ls(server, buff);
         // if_cd(server, buff);
-        // if_pwd(server, buff);
         // if_get(server, buff);
         // if_put(server, buff);
 
         //print it out to test
-        // printf("Client: %s\n", buff);
+        // printf("to_client: %s\n", to_client);
         
         //send back to client what you parsed 
-        send (server->server_accept, buff, ft_strlen(buff), 0);
+        send (server->server_accept, to_client, ft_strlen(to_client), 0);
+        
         //empty the buffer out
         ft_bzero(buff, sizeof(buff));
+        ft_bzero(buff, sizeof(to_client));
 
     }
 }
@@ -117,7 +132,7 @@ void create_client_server(t_server *server)
     struct sockaddr_in serv_addr;
     if ((server->server_socket = socket(AF_INET, SOCK_STREAM, 0)) < 0)
         error("Couldn't create a socket.\n");
-    printf("Server socket is created.\n");
+    printf("Server socket is created...\n");
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_addr.s_addr = INADDR_ANY;
     serv_addr.sin_port = htons(server->port);
@@ -126,7 +141,7 @@ void create_client_server(t_server *server)
         printf("%s", strerror(errno));
         error("Couldn't bind to port.\n");
     }
-    printf("Connected to port.\n");
+    printf("Connected to port...\n");
     server_loop(server);
 }               
 

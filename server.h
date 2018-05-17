@@ -20,6 +20,7 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <sys/param.h>
 #include "libft/libft.h"
 
 typedef struct s_server
@@ -28,6 +29,7 @@ typedef struct s_server
     int port;
     int server_accept;
     int ret_recv;
+    char *pwd;
 }   t_server;
 
 

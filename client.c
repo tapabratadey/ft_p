@@ -66,11 +66,11 @@ void client_loop(t_client *client)
         //receive back what server parsed and sent to you
         if ((client->ret_from_server = recv(client->client_socket, buff, 1023, 0)) <= 0)
             error("Couldn't receive a response from server.\n");
-        printf("Received response from server.\n");
+        // printf("Received response from server.\n");
         buff[client->ret_from_server] = '\0';
         
         //print it out
-        // printf("%s\n", buff);
+        printf("%s\n", buff);
 
         // reset buff and line
         ft_bzero(buff, sizeof(buff));
@@ -86,8 +86,8 @@ void create_client_socket(t_client *client, char *hostname)
     // create a socket
     client->client_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (client->client_socket < 0)
-        error("Couldn't create a socket\n");
-    printf("Client socket is created.\n");
+        error("Couldn't create a socket.\n");
+    printf("Client socket is created...\n");
     
     // fill the structure with null values
     // ft_memset((void**)&serv_addr, '\0', sizeof(serv_addr));
@@ -103,7 +103,7 @@ void create_client_socket(t_client *client, char *hostname)
     // connect
     if ((client->client_connect = connect(client->client_socket, (struct sockaddr *)&serv_addr, sizeof(serv_addr))) < 0)
         error("Couldn't Connect\n");
-    printf("Connected to Server.\n");
+    printf("Connected to Server.\n\n");
     client_loop(client);
 }
 
