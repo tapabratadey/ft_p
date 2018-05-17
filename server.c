@@ -50,6 +50,19 @@ void    if_ls(t_server *server, char *buff)
 {
     if (ft_strcmp(buff, "ls\n") == 0)
     {
+        if (fork() != 0)
+            close(server->server_accept);
+        else
+        {
+            close(server->server_socket);
+            //---Map stdin, stdout and stderr to the data connection
+				dup2(server->server_accept, 0);
+				dup2(server->server_accept, 1);
+				dup2(server->server_accept, 2);
+
+				//Call external program
+				execl("/bin/ls", "/bin/ls", "-al", "/sbin", 0);
+        }
 
     }
 }
