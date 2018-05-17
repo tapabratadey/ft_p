@@ -37,6 +37,21 @@ char *read_user(char *line)
     return (line);
 }
 
+void error_cases(t_client *client, char *line)
+{
+    if (ft_strcmp(line, "quit\n") == 0)
+        {
+            close(client->client_socket);
+            error("Disconnected.\n");
+        }
+    if ((ft_strcmp(line, "ls\n") != 0) && (ft_strcmp(line, "pwd\n") != 0))
+    {
+        //&& (ft_strcmp(line, "cd\n") != 0))
+        close(client->client_socket);
+        error("Wrong command.\n");
+    }
+}
+
 void client_loop(t_client *client)
 {
     char *line;
@@ -52,23 +67,18 @@ void client_loop(t_client *client)
 
         //read
         line = read_user(line);
-        if (ft_strcmp(line, "quit\n") == 0)
-        {
-            close(client->client_socket);
-            ft_putstr("Disconnected.\n");
-            exit(0);
-        }
+        error_cases(client, line);
 
         //send to that line(command) to server
         if (line)
             send(client->client_socket, line, ft_strlen(line), 0);
-        
+
         //receive back what server parsed and sent to you
         if ((client->ret_from_server = recv(client->client_socket, buff, 1023, 0)) <= 0)
             error("Couldn't receive a response from server.\n");
         // printf("Received response from server.\n");
         buff[client->ret_from_server] = '\0';
-        
+
         //print it out
         printf("%s\n", buff);
 
@@ -88,18 +98,15 @@ void create_client_socket(t_client *client, char *hostname)
     if (client->client_socket < 0)
         error("Couldn't create a socket.\n");
     printf("Client socket is created...\n");
-    
-    // fill the structure with null values
-    // ft_memset((void**)&serv_addr, '\0', sizeof(serv_addr));
-    
+
     // specify structure values
     serv_addr.sin_family = AF_INET; //refers to addresses from the internet
     serv_addr.sin_port = htons(client->port);
-    
+
     // converts IPv4 and IPv6 addresses from text to binary form
     if (inet_pton(AF_INET, hostname, &serv_addr.sin_addr) <= 0)
         error("Check your address.\n");
-    
+
     // connect
     if ((client->client_connect = connect(client->client_socket, (struct sockaddr *)&serv_addr, sizeof(serv_addr))) < 0)
         error("Couldn't Connect\n");

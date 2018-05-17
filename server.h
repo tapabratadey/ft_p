@@ -30,6 +30,7 @@ typedef struct s_server
     int server_accept;
     int ret_recv;
     char *pwd;
+    char *if_ls;
 }   t_server;
 
 

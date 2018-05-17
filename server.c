@@ -40,35 +40,35 @@ int error(char *str)
 //         ft_putstr("hey");
 // }
 
-// void    if_ls(t_server *server, char *buff)
-// {
-//     if (ft_strcmp(buff, "ls\n") == 0)
-//     {
-//         if (fork() != 0)
-//             close(server->server_accept);
-//         else
-//         {
-//             close(server->server_socket);
-//             //---Map stdin, stdout and stderr to the data connection
-// 				dup2(server->server_accept, 0);
-// 				dup2(server->server_accept, 1);
-// 				dup2(server->server_accept, 2);
+int    if_ls(t_server *server, char *buff)
+{
+    // parent
+    if (fork() != 0)
+        close(server->server_accept);
+    else
+    {
+        close(server->server_socket);
+        // Map stdin, stdout and stderr to the data connection
+            // dup2(server->server_accept, 0);
+            // dup2(server->server_accept, 1);
+            // dup2(server->server_accept, 2);
 
-// 				//Call external program
-// 				execl("/bin/ls", "/bin/ls", "-al", "/sbin", 0);
-//         }
-
-//     }
-// }
+            //Call external program
+            execl("/bin/ls", "/bin/ls", 0);
+    }
+    return (1);
+}
 
 int if_pwd(t_server *server, char *buff)
 {
-    char path[MAXPATHLEN];
-    if (ft_strcmp(buff, "pwd\n") == 0)
+    char *path;
+
+    path = (char *)malloc(sizeof(char *) * (MAXPATHLEN + 1));
+    server->pwd = getcwd(path, MAXPATHLEN);
+    if (server->pwd == NULL)
     {
-        server->pwd = getcwd(path, MAXPATHLEN);
-        if (server->pwd == NULL)
-            return (0);
+        printf("getcwd error");
+        exit (0);
     }
     return (1);
 }
@@ -89,26 +89,29 @@ void    get_from_client(t_server *server)
         printf("Client command: %s\n", buff);
         
         // parse it -TODO-
-        if (if_pwd(server, buff) == 1)
+        if (ft_strcmp("pwd\n", buff) == 0)
         {
-            to_client = ft_strdup(server->pwd);
-            to_client = ft_strjoin(to_client, "\nSUCCESS");
+            if (if_pwd(server, buff) == 1)
+                to_client = ft_strdup(server->pwd);
         }
-        // if_ls(server, buff);
+        else
+            if (if_ls(server, buff) == 1)
+                to_client = ft_strdup(server->if_ls);
+            
         // if_cd(server, buff);
         // if_get(server, buff);
         // if_put(server, buff);
 
         //print it out to test
-        // printf("to_client: %s\n", to_client);
+        printf("to_client: %s\n", to_client);
         
         //send back to client what you parsed 
         send (server->server_accept, to_client, ft_strlen(to_client), 0);
         
         //empty the buffer out
         ft_bzero(buff, sizeof(buff));
-        ft_bzero(buff, sizeof(to_client));
-
+        // ft_bzero(buff, sizeof(to_client));
+        free(to_client);
     }
 }
 
