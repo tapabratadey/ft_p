@@ -44,9 +44,8 @@ void error_cases(t_client *client, char *line)
             close(client->client_socket);
             error("Disconnected.\n");
         }
-    if ((ft_strcmp(line, "ls\n") != 0) && (ft_strcmp(line, "pwd\n") != 0))
+    if ((ft_strcmp(line, "ls\n") != 0) && (ft_strcmp(line, "pwd\n") != 0) && (ft_strcmp(line, "cd\n") != 0))
     {
-        //&& (ft_strcmp(line, "cd\n") != 0))
         close(client->client_socket);
         error("Wrong command.\n");
     }

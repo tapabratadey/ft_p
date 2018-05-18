@@ -22,17 +22,20 @@ int error(char *str)
 
 // void    if_get(t_server *server, char *buff)
 // {
-//     server = NULL;
-//     if (ft_strcmp(buff, "get\n") == 0)
-//         ft_putstr("hey");
+    
 // }
 
-// void    if_cd(t_server *server, char *buff)
-// {
-//     server = NULL;
-//     if (ft_strcmp(buff, "cd\n") == 0)
-//         ft_putstr("hey");
-// }
+void    if_cd(int fd, t_server *server)
+{
+    server = NULL;
+    close(0);
+    close(1);
+    close(2);
+    dup2(fd, 1);
+    dup2(fd, 2);
+
+    execl("/bin/cd", "cd", 0);
+}
 
 void if_pwd(int fd, t_server *server)
 {
@@ -44,18 +47,6 @@ void if_pwd(int fd, t_server *server)
     dup2(fd, 2);
 
     execl("/bin/pwd", "pwd", 0);
-#if 0
-    char *path;
-    (void)fd;
-    path = (char *)malloc(sizeof(char *) * (MAXPATHLEN + 1));
-    server->pwd = getcwd(path, MAXPATHLEN);
-    if (server->pwd == NULL)
-    {
-        printf("getcwd error");
-        exit(0);
-    }
-#endif
-    // return (1);
 }
 
 void if_ls(int fd)
@@ -67,8 +58,6 @@ void if_ls(int fd)
     dup2(fd, 2);
 
     execl("/bin/ls", "ls", 0);
-
-    // return (0);
 }
 
 void get_from_client(t_server *server, int fd)
@@ -88,23 +77,14 @@ void get_from_client(t_server *server, int fd)
         // parse it -TODO-
         if (ft_strcmp("pwd\n", buff) == 0)
             if_pwd(fd, server);
-        #if 0
-        {
-            if (if_pwd(fd, server) == 1)
-                to_client = ft_strdup(server->pwd);
-        }
-        #endif
         else if (ft_strcmp("ls\n", buff) == 0)
             if_ls(fd);
-        #if 0
-        {
-            if (if_ls(fd) == 1)
-                to_client = ft_strdup(server->read_buff);
-        }
-        #endif
-        // if_cd(server, buff);
-        // if_get(server, buff);
-        // if_put(server, buff);
+        else if (ft_strcmp("cd\n", buff) == 0)
+            if_cd(fd, server);
+        // else if (ft_strcmp("\n", buff) == 0)
+        //     if_get(server, buff);
+        // else if (ft_strcmp("ls\n", buff) == 0)
+        //     if_put(server, buff);
 
         //print it out to test
 
