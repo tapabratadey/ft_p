@@ -27,10 +27,10 @@ typedef struct s_server
 {
     int server_socket;
     int port;
-    int server_accept;
     int ret_recv;
     char *pwd;
     char *if_ls;
+    char *read_buff;
 }   t_server;
 
 
