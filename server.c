@@ -73,7 +73,7 @@ void get_from_client(t_server *server, int fd)
         printf("Bytes received: %d\n", server->ret_recv);
         buff[server->ret_recv] = '\0';
         printf("Client command: %s\n", buff);
-        
+
         // parse it -TODO-
         if (ft_strcmp("pwd\n", buff) == 0)
             if_pwd(fd, server);

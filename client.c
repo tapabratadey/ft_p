@@ -98,8 +98,8 @@ void create_client_socket(t_client *client, char *hostname)
 {
     // struct that deals with internet addresses
     struct sockaddr_in serv_addr;
-    // int optval;
-    // socklen_t optlen = sizeof(optval);
+    int optval;
+    socklen_t optlen = sizeof(optval);
 
     // create a socket
     client->client_socket = socket(AF_INET, SOCK_STREAM, 0);
@@ -116,7 +116,7 @@ void create_client_socket(t_client *client, char *hostname)
             exit(EXIT_FAILURE);
         }
         printf("SO_KEEPALIVE is %s\n", (optval ? "ON" : "OFF"));
-
+    #endif 
         // set keep alive on
         optval = 1;
         optlen = sizeof(optval);
@@ -127,7 +127,7 @@ void create_client_socket(t_client *client, char *hostname)
             exit(EXIT_FAILURE);
         }
         printf("SO_KEEPALIVE is set to ON\n");
-
+    #if 0
         // check the status again
         if (getsockopt(client->client_socket, SOL_SOCKET, SO_KEEPALIVE, &optval, &optlen) < 0)
         {
