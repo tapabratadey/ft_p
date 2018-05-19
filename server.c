@@ -64,7 +64,7 @@ void get_from_client(t_server *server, int fd)
 {
     char buff[1024];
     char *to_client;
-
+    
     //server receives the msg
     while (1)
     {
@@ -73,7 +73,7 @@ void get_from_client(t_server *server, int fd)
         printf("Bytes received: %d\n", server->ret_recv);
         buff[server->ret_recv] = '\0';
         printf("Client command: %s\n", buff);
-
+        
         // parse it -TODO-
         if (ft_strcmp("pwd\n", buff) == 0)
             if_pwd(fd, server);
@@ -98,6 +98,8 @@ void get_from_client(t_server *server, int fd)
     }
 }
 
+
+
 void server_loop(t_server *server)
 {
     int cli_fd;
@@ -111,6 +113,7 @@ void server_loop(t_server *server)
         if ((cli_fd = accept(server->server_socket, (struct sockaddr *)&cli_addr, &addr_len)) < 0)
             error("Couldn't accept connection.\n");
         printf("Connection accepted.\n\n");
+        // signal(SIGCHILD, proc_exit);
         if (fork() == 0)
             get_from_client(server, cli_fd);
     }

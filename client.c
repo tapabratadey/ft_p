@@ -40,10 +40,10 @@ char *read_user(char *line)
 void error_cases(t_client *client, char *line)
 {
     if (ft_strcmp(line, "quit\n") == 0)
-        {
-            close(client->client_socket);
-            error("Disconnected.\n");
-        }
+    {
+        close(client->client_socket);
+        error("Disconnected.\n");
+    }
     if ((ft_strcmp(line, "ls\n") != 0) && (ft_strcmp(line, "pwd\n") != 0) && (ft_strcmp(line, "cd\n") != 0))
     {
         close(client->client_socket);
@@ -56,6 +56,8 @@ void client_loop(t_client *client)
     char *line;
     int gnl;
     char buff[1024];
+    // int optval;
+    // socklen_t optlen = sizeof(optval);
 
     line = ft_strnew(1);
     gnl = 0;
@@ -68,13 +70,18 @@ void client_loop(t_client *client)
         line = read_user(line);
         error_cases(client, line);
 
+        ft_putstr(line);
         //send to that line(command) to server
         if (line)
             send(client->client_socket, line, ft_strlen(line), 0);
-
+        
         //receive back what server parsed and sent to you
         if ((client->ret_from_server = recv(client->client_socket, buff, 1023, 0)) <= 0)
+        {
+            printf("%d", client->ret_from_server);     
             error("Couldn't receive a response from server.\n");
+        }
+        printf("recv: %d", client->ret_from_server); 
         // printf("Received response from server.\n");
         buff[client->ret_from_server] = '\0';
 
@@ -91,6 +98,8 @@ void create_client_socket(t_client *client, char *hostname)
 {
     // struct that deals with internet addresses
     struct sockaddr_in serv_addr;
+    // int optval;
+    // socklen_t optlen = sizeof(optval);
 
     // create a socket
     client->client_socket = socket(AF_INET, SOCK_STREAM, 0);
@@ -98,6 +107,37 @@ void create_client_socket(t_client *client, char *hostname)
         error("Couldn't create a socket.\n");
     printf("Client socket is created...\n");
 
+    #if 0
+        // check the status for the keepalive option
+        if (getsockopt(client->client_socket, SOL_SOCKET, SO_KEEPALIVE, &optval, &optlen) < 0)
+        {
+            perror("getsockopt()");
+            close(client->client_socket);
+            exit(EXIT_FAILURE);
+        }
+        printf("SO_KEEPALIVE is %s\n", (optval ? "ON" : "OFF"));
+
+        // set keep alive on
+        optval = 1;
+        optlen = sizeof(optval);
+        if (setsockopt(client->client_socket, SOL_SOCKET, SO_KEEPALIVE, &optval, optlen) < 0)
+        {
+            perror("setsockopt()");
+            close(client->client_socket);
+            exit(EXIT_FAILURE);
+        }
+        printf("SO_KEEPALIVE is set to ON\n");
+
+        // check the status again
+        if (getsockopt(client->client_socket, SOL_SOCKET, SO_KEEPALIVE, &optval, &optlen) < 0)
+        {
+            perror("getsockopt()");
+            close(client->client_socket);
+            exit(EXIT_FAILURE);
+        }
+        printf("SO_KEEPALIVE is %s\n\n", (optval ? "ON" : "OFF"));
+
+    #endif
     // specify structure values
     serv_addr.sin_family = AF_INET; //refers to addresses from the internet
     serv_addr.sin_port = htons(client->port);
