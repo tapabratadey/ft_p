@@ -25,17 +25,17 @@ int error(char *str)
     
 // }
 
-void    if_cd(int fd, t_server *server)
-{
-    server = NULL;
-    close(0);
-    close(1);
-    close(2);
-    dup2(fd, 1);
-    dup2(fd, 2);
+// void    if_cd(int fd, t_server *server)
+// {
+//     server = NULL;
+//     close(0);
+//     close(1);
+//     close(2);
+//     dup2(fd, 1);
+//     dup2(fd, 2);
 
-    execl("/bin/cd", "cd", 0);
-}
+//     execl("/bin/cd", "cd", 0);
+// }
 
 void if_pwd(int fd, t_server *server)
 {
@@ -64,38 +64,50 @@ void get_from_client(t_server *server, int fd)
 {
     char buff[1024];
     char *to_client;
-    
-    //server receives the msg
-    while (1)
+
+    // second fork 
+    // the parent waits for the child to terminate
+    // using waitpid
+    if (fork() > 0)
     {
-        // receive what the client sent you
-        server->ret_recv = recv(fd, buff, sizeof(buff) - 1, 0);
-        printf("Bytes received: %d\n", server->ret_recv);
-        buff[server->ret_recv] = '\0';
-        printf("Client command: %s\n", buff);
+        int status;
 
-        // parse it -TODO-
-        if (ft_strcmp("pwd\n", buff) == 0)
-            if_pwd(fd, server);
-        else if (ft_strcmp("ls\n", buff) == 0)
-            if_ls(fd);
-        else if (ft_strcmp("cd\n", buff) == 0)
-            if_cd(fd, server);
-        // else if (ft_strcmp("\n", buff) == 0)
-        //     if_get(server, buff);
-        // else if (ft_strcmp("ls\n", buff) == 0)
-        //     if_put(server, buff);
-
-        //print it out to test
-
-        //send back to client what you parsed
-        // send(server->server_accept, to_client, ft_strlen(to_client), 0);
-
-        //empty the buffer out
-        ft_bzero(buff, sizeof(buff));
-        ft_bzero(buff, sizeof(to_client));
-        // free(to_client);
+        waitpid(-1, &status, 0);
+        close(fd);
+        printf("the child exited.\n");
+        exit(EXIT_SUCCESS);
     }
+
+    // SECOND CHILD
+
+    //server receives the msg
+
+    // receive what the client sent you
+    server->ret_recv = recv(fd, buff, sizeof(buff) - 1, 0);
+    printf("Bytes received: %d\n", server->ret_recv);
+    buff[server->ret_recv] = '\0';
+    printf("Client command: %s\n", buff);
+
+    // parse it -TODO-
+    if (ft_strcmp("pwd\n", buff) == 0)
+        if_pwd(fd, server);
+    else if (ft_strcmp("ls\n", buff) == 0)
+        if_ls(fd);
+    // else if (ft_strcmp("cd\n", buff) == 0)
+    //     if_cd(fd, server);
+    // else if (ft_strcmp("\n", buff) == 0)
+    //     if_get(server, buff);
+    // else if (ft_strcmp("ls\n", buff) == 0)
+    //     if_put(server, buff);
+
+    //print it out to test
+
+    //send back to client what you parsed
+    // send(server->server_accept, to_client, ft_strlen(to_client), 0);
+
+    //empty the buffer out
+    ft_bzero(buff, sizeof(buff));
+    ft_bzero(buff, sizeof(to_client));
 }
 
 
@@ -113,7 +125,7 @@ void server_loop(t_server *server)
         if ((cli_fd = accept(server->server_socket, (struct sockaddr *)&cli_addr, &addr_len)) < 0)
             error("Couldn't accept connection.\n");
         printf("Connection accepted.\n\n");
-        // signal(SIGCHILD, proc_exit);
+        // FORK RUNS IN A LOOP (parent) (child gets created)
         if (fork() == 0)
             get_from_client(server, cli_fd);
     }

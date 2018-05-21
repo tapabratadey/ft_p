@@ -61,8 +61,8 @@ void client_loop(t_client *client)
 
     line = ft_strnew(1);
     gnl = 0;
-    while (1)
-    {
+    // while (1)
+    // {
         // start
         ft_putstr("-> ");
 
@@ -73,13 +73,20 @@ void client_loop(t_client *client)
         ft_putstr(line);
         //send to that line(command) to server
         if (line)
-            send(client->client_socket, line, ft_strlen(line), 0);
-        
+        {
+            if (send(client->client_socket, line, ft_strlen(line), 0) <= 0)
+            {
+                printf("We died\n");
+                return ;
+            }
+        }
+
         //receive back what server parsed and sent to you
         if ((client->ret_from_server = recv(client->client_socket, buff, 1023, 0)) <= 0)
         {
             printf("%d", client->ret_from_server);     
             error("Couldn't receive a response from server.\n");
+            return ;
         }
         printf("recv: %d", client->ret_from_server); 
         // printf("Received response from server.\n");
@@ -91,7 +98,8 @@ void client_loop(t_client *client)
         // reset buff and line
         ft_bzero(buff, sizeof(buff));
         ft_bzero(line, sizeof(line));
-    }
+        close (client->client_socket);
+    // }
 }
 
 void create_client_socket(t_client *client, char *hostname)
@@ -161,7 +169,12 @@ int main(int argc, char **argv)
     client->port = ft_atoi(argv[2]);
     if (argc != 3)
         error("Usage: ./client <host machine> <port>\n");
-    create_client_socket(client, argv[1]);
-    close(client->client_socket);
+    
+    while(1)
+    {
+        printf("NOW WE ARE CONNECTING.\n");
+        create_client_socket(client, argv[1]);
+        close(client->client_socket);
+    }
     return (0);
 }
