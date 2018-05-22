@@ -18,25 +18,6 @@ int error(char *str)
     exit(0);
 }
 
-char *read_user(char *line)
-{
-    int read_ret;
-    char buff[2];
-    char *old_line;
-
-    read_ret = 0;
-    while ((read_ret = read(0, buff, 1)) > 0)
-    {
-        buff[1] = '\0';
-        old_line = line;
-        line = ft_strjoin(line, buff);
-        free(old_line);
-        if (buff[0] == '\n')
-            break;
-    }
-    return (line);
-}
-
 void error_cases(t_client *client, char *line)
 {
     if (ft_strcmp(line, "quit\n") == 0)
@@ -44,62 +25,50 @@ void error_cases(t_client *client, char *line)
         close(client->client_socket);
         error("Disconnected.\n");
     }
-    if ((ft_strcmp(line, "ls\n") != 0) && (ft_strcmp(line, "pwd\n") != 0) && (ft_strcmp(line, "cd\n") != 0))
+
+    if ((ft_strcmp(line, "ls\n") != 0) && (ft_strcmp(line, "pwd\n") != 0) && (ft_strcmp(line, "cd\n") != 0)
+    && (ft_strcmp(line, "cd ..\n") != 0) && (ft_strcmp(line, "cd libft\n") != 0) && (ft_strcmp(line, "cd /\n") != 0) &&
+    (ft_strcmp(line, "cd cli\n") != 0) && (ft_strcmp(line, "cd srv\n") != 0))
     {
         close(client->client_socket);
         error("Wrong command.\n");
     }
 }
 
-void client_loop(t_client *client)
+void client_call(t_client *client)
 {
     char *line;
-    int gnl;
     char buff[1024];
-    // int optval;
-    // socklen_t optlen = sizeof(optval);
 
     line = ft_strnew(1);
-    gnl = 0;
-    // while (1)
-    // {
-        // start
-        ft_putstr("-> ");
-
-        //read
-        line = read_user(line);
-        error_cases(client, line);
-
-        ft_putstr(line);
-        //send to that line(command) to server
-        if (line)
-        {
-            if (send(client->client_socket, line, ft_strlen(line), 0) <= 0)
-            {
-                printf("We died\n");
-                return ;
-            }
-        }
-
-        //receive back what server parsed and sent to you
-        if ((client->ret_from_server = recv(client->client_socket, buff, 1023, 0)) <= 0)
-        {
-            printf("%d", client->ret_from_server);     
-            error("Couldn't receive a response from server.\n");
-            return ;
-        }
-        printf("recv: %d", client->ret_from_server); 
-        // printf("Received response from server.\n");
-        buff[client->ret_from_server] = '\0';
-
-        //print it out
-        printf("%s\n", buff);
-
-        // reset buff and line
-        ft_bzero(buff, sizeof(buff));
-        ft_bzero(line, sizeof(line));
-        close (client->client_socket);
-    // }
+    // start
+    ft_putstr("-> ");
+    //read
+    line = read_user(line);
+    error_cases(client, line);
+    //send to that line(command) to server
+    if (line)
+    {
+        if (send(client->client_socket, line, ft_strlen(line), 0) <= 0)
+            return;
+    }
+    //receive back what server parsed and sent to you
+    if ((client->ret_from_server = recv(client->client_socket, buff, 1023, 0)) <= 0)
+    {
+        printf("%d", client->ret_from_server);
+        error("Couldn't receive a response from server.\n");
+        return;
+    }
+    // printf("Received response from server.\n");
+    buff[client->ret_from_server] = '\0';
+    if (ft_strcmp("Cannot change from root directory.\n", buff) == 0)
+        error("Cannot change from root directory.\n");
+    //print it out
+    printf("%s\n", buff);
+    // reset buff and line
+    ft_bzero(buff, sizeof(buff));
+    ft_bzero(line, sizeof(line));
+    close(client->client_socket);
 }
 
 void create_client_socket(t_client *client, char *hostname)
@@ -115,37 +84,18 @@ void create_client_socket(t_client *client, char *hostname)
         error("Couldn't create a socket.\n");
     printf("Client socket is created...\n");
 
-    #if 0
-        // check the status for the keepalive option
-        if (getsockopt(client->client_socket, SOL_SOCKET, SO_KEEPALIVE, &optval, &optlen) < 0)
-        {
-            perror("getsockopt()");
-            close(client->client_socket);
-            exit(EXIT_FAILURE);
-        }
-        printf("SO_KEEPALIVE is %s\n", (optval ? "ON" : "OFF"));
-    #endif 
-        // set keep alive on
-        optval = 1;
-        optlen = sizeof(optval);
-        if (setsockopt(client->client_socket, SOL_SOCKET, SO_KEEPALIVE, &optval, optlen) < 0)
-        {
-            perror("setsockopt()");
-            close(client->client_socket);
-            exit(EXIT_FAILURE);
-        }
-        printf("SO_KEEPALIVE is set to ON\n");
-    #if 0
-        // check the status again
-        if (getsockopt(client->client_socket, SOL_SOCKET, SO_KEEPALIVE, &optval, &optlen) < 0)
-        {
-            perror("getsockopt()");
-            close(client->client_socket);
-            exit(EXIT_FAILURE);
-        }
-        printf("SO_KEEPALIVE is %s\n\n", (optval ? "ON" : "OFF"));
+    // set keep alive on
+    optval = 1;
+    optlen = sizeof(optval);
 
-    #endif
+    if (setsockopt(client->client_socket, SOL_SOCKET, SO_KEEPALIVE, &optval, optlen) < 0)
+    {
+        perror("setsockopt()");
+        close(client->client_socket);
+        exit(EXIT_FAILURE);
+    }
+    printf("SO_KEEPALIVE is set to ON\n");
+
     // specify structure values
     serv_addr.sin_family = AF_INET; //refers to addresses from the internet
     serv_addr.sin_port = htons(client->port);
@@ -158,7 +108,7 @@ void create_client_socket(t_client *client, char *hostname)
     if ((client->client_connect = connect(client->client_socket, (struct sockaddr *)&serv_addr, sizeof(serv_addr))) < 0)
         error("Couldn't Connect\n");
     printf("Connected to Server.\n\n");
-    client_loop(client);
+    client_call(client);
 }
 
 int main(int argc, char **argv)
@@ -169,8 +119,7 @@ int main(int argc, char **argv)
     client->port = ft_atoi(argv[2]);
     if (argc != 3)
         error("Usage: ./client <host machine> <port>\n");
-    
-    while(1)
+    while (1)
     {
         printf("NOW WE ARE CONNECTING.\n");
         create_client_socket(client, argv[1]);

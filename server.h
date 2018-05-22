@@ -21,6 +21,8 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/param.h>
+#include <string.h>
+#include <errno.h>
 #include "libft/libft.h"
 
 typedef struct s_server
@@ -38,4 +40,8 @@ typedef struct s_server
 void    server_loop(t_server *server);
 void create_client_server(t_server *server);
 int error(char *str);
+
+void if_ls(int fd);
+void if_pwd(int fd, t_server *server);
+void create_client_server(t_server *server);
 #endif
