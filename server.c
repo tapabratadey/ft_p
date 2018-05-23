@@ -12,89 +12,71 @@
 
 #include "server.h"
 
-
 int error(char *str)
 {
     ft_putstr(str);
     exit(0);
 }
 
-void get_cwd(t_server *server)
+void    cd_dot_dot(int fd, t_server *server)
 {
-    // char *path;
-
-    // path = (char *)malloc(sizeof(char *) * (MAXPATHLEN + 1));
-    getcwd(server->pwd, MAXPATHLEN);
-    // if (server->pwd == NULL)
-    // {
-        // printf("getcwd error");
-        // exit (0);
-    // }
-}
-
-
-void    parse_cd(char *buff, int fd, t_server *server)
-{
-    // cd bring back to root
     // cd .. change dir
-    // cd / go to root
-    // cd <folder> go into a folder 
     char *to_client;
 
     to_client = "Cannot change from root directory.\n";
-    if (ft_strcmp("cd ..\n", buff) == 0)
+    if (ft_strcmp(server->pwd, "/nfs/2017/t/tadey/ft_p") == 0)
+        send(fd, to_client, ft_strlen(to_client), 0);
+    else
     {
-        if (ft_strcmp(server->pwd, "/nfs/2017/t/tadey/ft_p") == 0)
-            send(fd, to_client, ft_strlen(to_client), 0);
-        else
-        {
-            if (chdir("/nfs/2017/t/tadey/ft_p") == 0)
-                send(fd, "SUCCESS", ft_strlen("SUCCESS"), 0);
-            else
-                send(fd, "ERROR", ft_strlen("ERROR"), 0);
-        }
-    }
-    else if ((ft_strcmp(buff, "cd\n") == 0) || (ft_strcmp(buff, "cd /\n") == 0))
-    {
-        if (ft_strcmp(server->pwd, "/nfs/2017/t/tadey/ft_p") == 0)
+        if (chdir("/nfs/2017/t/tadey/ft_p") == 0)
             send(fd, "SUCCESS", ft_strlen("SUCCESS"), 0);
         else
-        {
-            if (chdir("/nfs/2017/t/tadey/ft_p") == 0)
-                send(fd, "SUCCESS", ft_strlen("SUCCESS"), 0);
-            else
-                send(fd, "ERROR", ft_strlen("ERROR"), 0);
-        }
+            send(fd, "ERROR", ft_strlen("ERROR"), 0);
     }
-    else if (ft_strcmp(buff, "cd libft\n") == 0)
+}
+
+void    cd_cd_slash(int fd, t_server *server)
+{
+    // cd bring back to root
+    // cd / go to root
+    if (ft_strcmp(server->pwd, "/nfs/2017/t/tadey/ft_p") == 0)
+        send(fd, "SUCCESS", ft_strlen("SUCCESS"), 0);
+    else
+    {
+        if (chdir("/nfs/2017/t/tadey/ft_p") == 0)
+            send(fd, "SUCCESS", ft_strlen("SUCCESS"), 0);
+        else
+            send(fd, "ERROR", ft_strlen("ERROR"), 0);
+    }
+}
+#if 0
+void    cd_folder(int fd, t_server *server, char **store)
+{
+    // cd <folder> go into a folder 
+    if (ft_strcmp(buff, "cd libft\n") == 0)
     {
         if (chdir("/nfs/2017/t/tadey/ft_p/libft") == 0)
         {
-        getcwd(server->pwd, MAXPATHLEN);
-        ft_putstr("Server CWD: ");
-        ft_putendl(server->pwd);
+            getcwd(server->pwd, MAXPATHLEN);
+            ft_putstr("Server CWD: ");
+            ft_putendl(server->pwd);
             send(fd, "SUCCESS", ft_strlen("SUCCESS"), 0);
         }
         else
             send(fd, "ERROR", ft_strlen("ERROR"), 0);
     }
-    #if 0
-    if (ft_strcmp(buff, "cd cli\n") == 0)
-    {
-        if (chdir("/nfs/2017/t/tadey/ft_p/cli") == 0)
-            send(fd, "SUCCESS", ft_strlen("SUCCESS"), 0);
-        else
-            send(fd, "ERROR", ft_strlen("ERROR"), 0);
-    }
-    if (ft_strcmp(buff, "cd srv\n") == 0)
-    {
-        if (chdir("/nfs/2017/t/tadey/ft_p/libft/srv") == 0)
-            send(fd, "SUCCESS", ft_strlen("SUCCESS"), 0);
-        else
-            send(fd, "ERROR", ft_strlen("ERROR"), 0);
-    }
-    #endif
 }
+#endif
+
+void    parse_cd(int fd, t_server *server, char **store)
+{
+    if ((ft_strcmp(store[0], "cd\n") == 0) || (ft_strcmp(store[1], "/\n") == 0))
+        cd_cd_slash(fd, server);
+    else if (ft_strcmp(store[1], "..\n") == 0)
+        cd_dot_dot(fd, server);
+    // else if cd_folder(buff, fd, server, store);
+}
+
 void clear_buff(char *buf, int size)
 {
     int i;
@@ -106,52 +88,34 @@ void clear_buff(char *buf, int size)
         i++;
     }
 }
+
 void get_from_client(t_server *server, int fd)
 {
     char buff[2048];
-    // char *to_client;
-    
-
-    // second fork
-    // the parent waits for the child to terminate
-    // using waitpid
-    #if 0
-    if (fork() > 0)
-    {
-        int status;
-
-        waitpid(-1, &status, 0);
-        close(fd);
-        printf("the child exited.\n");
-        exit(EXIT_SUCCESS);
-    }
-    #endif
-
-    // SECOND CHILD
-
-    //server receives the msg
+    char **store;
 
     // receive what the client sent you
     while((server->ret_recv = recv(fd, buff, sizeof(buff) - 1, 0)) <= 0);
     printf("Bytes received: %d\n", server->ret_recv);
     buff[server->ret_recv] = '\0';
+    store = ft_strsplit(buff, ' ');
+    // ft_putstr(store[0]);
+    // ft_putchar('\n');
+    // ft_putstr(store[1]);
     printf("Client command: %s\n", buff);
 
     // parse it -TODO-
-    // get_cwd(server);
     getcwd(server->pwd, MAXPATHLEN);
-    parse_cd(buff, fd, server);
-    if (ft_strcmp("pwd\n", buff) == 0)
+    if ((ft_strcmp(store[0], "cd") == 0) || (ft_strcmp(store[0], "cd\n") == 0))
+        parse_cd(fd, server, store);
+    else if (ft_strcmp("pwd\n", buff) == 0)
         if_pwd(fd);
     else if (ft_strcmp("ls\n", buff) == 0)
         if_ls(fd);
-    ft_putstr("Done with child");
-    //send back to client what you parsed
-    // send(server->server_accept, to_client, ft_strlen(to_client), 0);
+    ft_putstr("Done with child.\n");
 
     //empty the buffer out
     clear_buff(buff, 2048);
-    // ft_bzero(buff, sizeof(to_client));
 }
 
 void server_loop(t_server *server)
@@ -169,7 +133,8 @@ void server_loop(t_server *server)
         if ((cli_fd = accept(server->server_socket, (struct sockaddr *)&cli_addr, &addr_len)) < 0)
             error("Couldn't accept connection.\n");
         printf("Connection accepted.\n\n");
-        // FORK RUNS IN A LOOP (parent) (child gets created)
+        // FORK 
+        // run in a loop to recv from client
         if (fork() == 0)
         {
             ft_putendl("Forking for client");

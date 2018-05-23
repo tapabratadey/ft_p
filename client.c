@@ -25,7 +25,7 @@ void error_cases(t_client *client, char *line)
         close(client->client_socket);
         error("Disconnected.\n");
     }
-
+    #if 0
     if ((ft_strcmp(line, "ls\n") != 0) && (ft_strcmp(line, "pwd\n") != 0) && (ft_strcmp(line, "cd\n") != 0)
     && (ft_strcmp(line, "cd ..\n") != 0) && (ft_strcmp(line, "cd libft\n") != 0) && (ft_strcmp(line, "cd /\n") != 0) &&
     (ft_strcmp(line, "cd cli\n") != 0) && (ft_strcmp(line, "cd srv\n") != 0))
@@ -33,7 +33,9 @@ void error_cases(t_client *client, char *line)
         close(client->client_socket);
         error("Wrong command.\n");
     }
+    #endif
 }
+
 void clear_buff(char *buf, int size)
 {
     int i;
@@ -45,6 +47,17 @@ void clear_buff(char *buf, int size)
         i++;
     }
 }
+
+void    recv_from_server(t_client *client, char *buff)
+{
+    if ((client->ret_from_server = recv(client->client_socket, buff, 2048, 0)) <= 0)
+    {
+        printf("%d", client->ret_from_server);
+        error("Couldn't receive a response from server.\n");
+        return;
+    }
+}
+
 void client_call(t_client *client)
 {
     char *line;
@@ -63,13 +76,7 @@ void client_call(t_client *client)
             return;
     }
     //receive back what server parsed and sent to you
-    if ((client->ret_from_server = recv(client->client_socket, buff, 2048, 0)) <= 0)
-    {
-        printf("%d", client->ret_from_server);
-        error("Couldn't receive a response from server.\n");
-        return;
-    }
-    // printf("Received response from server.\n");
+    recv_from_server(client, buff);
     buff[client->ret_from_server] = '\0';
     if (ft_strcmp("Cannot change from root directory.\n", buff) == 0)
         error("Cannot change from root directory.\n");
@@ -86,10 +93,12 @@ void create_client_socket(t_client *client, char *hostname)
     // struct that deals with internet addresses
     struct sockaddr_in serv_addr;
     int optval;
-    socklen_t optlen = sizeof(optval);
+    socklen_t optlen;
     int client_running;
 
+    optlen = sizeof(optval);
     client_running = 1;
+
     // create a socket
     client->client_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (client->client_socket < 0)
@@ -99,14 +108,6 @@ void create_client_socket(t_client *client, char *hostname)
     // set keep alive on
     optval = 1;
     optlen = sizeof(optval);
-
-    // if (setsockopt(client->client_socket, SOL_SOCKET, SO_KEEPALIVE, &optval, optlen) < 0)
-    // {
-    //     perror("setsockopt()");
-    //     close(client->client_socket);
-    //     exit(EXIT_FAILURE);
-    // }
-    // printf("SO_KEEPALIVE is set to ON\n");
 
     // specify structure values
     serv_addr.sin_family = AF_INET; //refers to addresses from the internet
@@ -134,7 +135,6 @@ int main(int argc, char **argv)
         error("Usage: ./client <host machine> <port>\n");
     while (1)
     {
-        printf("NOW WE ARE CONNECTING.\n");
         create_client_socket(client, argv[1]);
         close(client->client_socket);
     }
