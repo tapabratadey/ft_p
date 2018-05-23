@@ -42,6 +42,6 @@ void create_client_server(t_server *server);
 int error(char *str);
 
 void if_ls(int fd);
-void if_pwd(int fd, t_server *server);
+void if_pwd(int fd);
 void create_client_server(t_server *server);
 #endif

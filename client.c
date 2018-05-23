@@ -34,11 +34,21 @@ void error_cases(t_client *client, char *line)
         error("Wrong command.\n");
     }
 }
+void clear_buff(char *buf, int size)
+{
+    int i;
 
+    i = 0;
+    while(i < size)
+    {
+        buf[i] = '\0';
+        i++;
+    }
+}
 void client_call(t_client *client)
 {
     char *line;
-    char buff[1024];
+    char buff[2048];
 
     line = ft_strnew(1);
     // start
@@ -53,7 +63,7 @@ void client_call(t_client *client)
             return;
     }
     //receive back what server parsed and sent to you
-    if ((client->ret_from_server = recv(client->client_socket, buff, 1023, 0)) <= 0)
+    if ((client->ret_from_server = recv(client->client_socket, buff, 2048, 0)) <= 0)
     {
         printf("%d", client->ret_from_server);
         error("Couldn't receive a response from server.\n");
@@ -66,9 +76,9 @@ void client_call(t_client *client)
     //print it out
     printf("%s\n", buff);
     // reset buff and line
-    ft_bzero(buff, sizeof(buff));
+    clear_buff(buff, 2048);
     ft_bzero(line, sizeof(line));
-    close(client->client_socket);
+    // close(client->client_socket);
 }
 
 void create_client_socket(t_client *client, char *hostname)
@@ -77,7 +87,9 @@ void create_client_socket(t_client *client, char *hostname)
     struct sockaddr_in serv_addr;
     int optval;
     socklen_t optlen = sizeof(optval);
+    int client_running;
 
+    client_running = 1;
     // create a socket
     client->client_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (client->client_socket < 0)
@@ -88,13 +100,13 @@ void create_client_socket(t_client *client, char *hostname)
     optval = 1;
     optlen = sizeof(optval);
 
-    if (setsockopt(client->client_socket, SOL_SOCKET, SO_KEEPALIVE, &optval, optlen) < 0)
-    {
-        perror("setsockopt()");
-        close(client->client_socket);
-        exit(EXIT_FAILURE);
-    }
-    printf("SO_KEEPALIVE is set to ON\n");
+    // if (setsockopt(client->client_socket, SOL_SOCKET, SO_KEEPALIVE, &optval, optlen) < 0)
+    // {
+    //     perror("setsockopt()");
+    //     close(client->client_socket);
+    //     exit(EXIT_FAILURE);
+    // }
+    // printf("SO_KEEPALIVE is set to ON\n");
 
     // specify structure values
     serv_addr.sin_family = AF_INET; //refers to addresses from the internet
@@ -108,7 +120,8 @@ void create_client_socket(t_client *client, char *hostname)
     if ((client->client_connect = connect(client->client_socket, (struct sockaddr *)&serv_addr, sizeof(serv_addr))) < 0)
         error("Couldn't Connect\n");
     printf("Connected to Server.\n\n");
-    client_call(client);
+    while(client_running)
+        client_call(client);
 }
 
 int main(int argc, char **argv)

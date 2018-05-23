@@ -21,15 +21,15 @@ int error(char *str)
 
 void get_cwd(t_server *server)
 {
-    char *path;
+    // char *path;
 
-    path = (char *)malloc(sizeof(char *) * (MAXPATHLEN + 1));
-    server->pwd = getcwd(path, MAXPATHLEN);
-    if (server->pwd == NULL)
-    {
-        printf("getcwd error");
-        exit (0);
-    }
+    // path = (char *)malloc(sizeof(char *) * (MAXPATHLEN + 1));
+    getcwd(server->pwd, MAXPATHLEN);
+    // if (server->pwd == NULL)
+    // {
+        // printf("getcwd error");
+        // exit (0);
+    // }
 }
 
 
@@ -54,7 +54,7 @@ void    parse_cd(char *buff, int fd, t_server *server)
                 send(fd, "ERROR", ft_strlen("ERROR"), 0);
         }
     }
-    if ((ft_strcmp(buff, "cd\n") == 0) || (ft_strcmp(buff, "cd /\n") == 0))
+    else if ((ft_strcmp(buff, "cd\n") == 0) || (ft_strcmp(buff, "cd /\n") == 0))
     {
         if (ft_strcmp(server->pwd, "/nfs/2017/t/tadey/ft_p") == 0)
             send(fd, "SUCCESS", ft_strlen("SUCCESS"), 0);
@@ -66,10 +66,15 @@ void    parse_cd(char *buff, int fd, t_server *server)
                 send(fd, "ERROR", ft_strlen("ERROR"), 0);
         }
     }
-    if (ft_strcmp(buff, "cd libft\n") == 0)
+    else if (ft_strcmp(buff, "cd libft\n") == 0)
     {
         if (chdir("/nfs/2017/t/tadey/ft_p/libft") == 0)
+        {
+        getcwd(server->pwd, MAXPATHLEN);
+        ft_putstr("Server CWD: ");
+        ft_putendl(server->pwd);
             send(fd, "SUCCESS", ft_strlen("SUCCESS"), 0);
+        }
         else
             send(fd, "ERROR", ft_strlen("ERROR"), 0);
     }
@@ -81,7 +86,6 @@ void    parse_cd(char *buff, int fd, t_server *server)
         else
             send(fd, "ERROR", ft_strlen("ERROR"), 0);
     }
-    #endif
     if (ft_strcmp(buff, "cd srv\n") == 0)
     {
         if (chdir("/nfs/2017/t/tadey/ft_p/libft/srv") == 0)
@@ -89,17 +93,29 @@ void    parse_cd(char *buff, int fd, t_server *server)
         else
             send(fd, "ERROR", ft_strlen("ERROR"), 0);
     }
+    #endif
 }
+void clear_buff(char *buf, int size)
+{
+    int i;
 
+    i = 0;
+    while(i < size)
+    {
+        buf[i] = '\0';
+        i++;
+    }
+}
 void get_from_client(t_server *server, int fd)
 {
-    char buff[1024];
-    char *to_client;
+    char buff[2048];
+    // char *to_client;
     
 
     // second fork
     // the parent waits for the child to terminate
     // using waitpid
+    #if 0
     if (fork() > 0)
     {
         int status;
@@ -109,32 +125,33 @@ void get_from_client(t_server *server, int fd)
         printf("the child exited.\n");
         exit(EXIT_SUCCESS);
     }
+    #endif
 
     // SECOND CHILD
 
     //server receives the msg
 
     // receive what the client sent you
-    server->ret_recv = recv(fd, buff, sizeof(buff) - 1, 0);
+    while((server->ret_recv = recv(fd, buff, sizeof(buff) - 1, 0)) <= 0);
     printf("Bytes received: %d\n", server->ret_recv);
     buff[server->ret_recv] = '\0';
     printf("Client command: %s\n", buff);
 
     // parse it -TODO-
-    get_cwd(server);
+    // get_cwd(server);
+    getcwd(server->pwd, MAXPATHLEN);
     parse_cd(buff, fd, server);
     if (ft_strcmp("pwd\n", buff) == 0)
-        if_pwd(fd, server);
+        if_pwd(fd);
     else if (ft_strcmp("ls\n", buff) == 0)
         if_ls(fd);
-    
-
+    ft_putstr("Done with child");
     //send back to client what you parsed
     // send(server->server_accept, to_client, ft_strlen(to_client), 0);
 
     //empty the buffer out
-    ft_bzero(buff, sizeof(buff));
-    ft_bzero(buff, sizeof(to_client));
+    clear_buff(buff, 2048);
+    // ft_bzero(buff, sizeof(to_client));
 }
 
 void server_loop(t_server *server)
@@ -142,8 +159,10 @@ void server_loop(t_server *server)
     int cli_fd;
     struct sockaddr_in cli_addr;
     socklen_t addr_len;
+    int in_client; 
 
     listen(server->server_socket, 10);
+    in_client = 1;
     addr_len = sizeof(cli_addr);
     while (1)
     {
@@ -152,7 +171,11 @@ void server_loop(t_server *server)
         printf("Connection accepted.\n\n");
         // FORK RUNS IN A LOOP (parent) (child gets created)
         if (fork() == 0)
-            get_from_client(server, cli_fd);
+        {
+            ft_putendl("Forking for client");
+            while(in_client)
+                get_from_client(server, cli_fd);
+        }
     }
 }
 

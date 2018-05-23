@@ -1,13 +1,10 @@
 #include "../server.h"
 
-void if_pwd(int fd, t_server *server)
+void if_pwd(int fd)
 {
-    server = NULL;
-    close(0);
-    close(1);
-    close(2);
-    dup2(fd, 1);
-    dup2(fd, 2);
+    char *current_cwd;
 
-    execl("/bin/pwd", "pwd", 0);
+    current_cwd = NULL;
+    current_cwd = getcwd(current_cwd, MAXPATHLEN);
+    send(fd, current_cwd, ft_strlen(current_cwd), 0);
 }
