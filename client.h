@@ -35,6 +35,8 @@ typedef struct s_client
 void    create_client_socket(t_client *client, char *hostname);
 int     error(char *str);
 void    client_loop(t_client *client);
-int		get_next_line(int const fd, char **line);
 char    *read_user(char *line);
+void error_cases(t_client *client, char **store);
+void clear_buff(char *buf, int size);
+void client_call(t_client *client);
 #endif

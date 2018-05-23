@@ -44,4 +44,6 @@ int error(char *str);
 void if_ls(int fd);
 void if_pwd(int fd);
 void create_client_server(t_server *server);
+void parse_cd(int fd, t_server *server, char **store);
+void clear_buff(char *buf, int size);
 #endif

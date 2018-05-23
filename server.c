@@ -12,96 +12,17 @@
 
 #include "server.h"
 
-int error(char *str)
-{
-    ft_putstr(str);
-    exit(0);
-}
-
-void    cd_dot_dot(int fd, t_server *server)
-{
-    // cd .. change dir
-    char *to_client;
-
-    to_client = "Cannot change from root directory.\n";
-    if (ft_strcmp(server->pwd, "/nfs/2017/t/tadey/ft_p") == 0)
-        send(fd, to_client, ft_strlen(to_client), 0);
-    else
-    {
-        if (chdir("/nfs/2017/t/tadey/ft_p") == 0)
-            send(fd, "SUCCESS", ft_strlen("SUCCESS"), 0);
-        else
-            send(fd, "ERROR", ft_strlen("ERROR"), 0);
-    }
-}
-
-void    cd_cd_slash(int fd, t_server *server)
-{
-    // cd bring back to root
-    // cd / go to root
-    if (ft_strcmp(server->pwd, "/nfs/2017/t/tadey/ft_p") == 0)
-        send(fd, "SUCCESS", ft_strlen("SUCCESS"), 0);
-    else
-    {
-        if (chdir("/nfs/2017/t/tadey/ft_p") == 0)
-            send(fd, "SUCCESS", ft_strlen("SUCCESS"), 0);
-        else
-            send(fd, "ERROR", ft_strlen("ERROR"), 0);
-    }
-}
-#if 0
-void    cd_folder(int fd, t_server *server, char **store)
-{
-    // cd <folder> go into a folder 
-    if (ft_strcmp(buff, "cd libft\n") == 0)
-    {
-        if (chdir("/nfs/2017/t/tadey/ft_p/libft") == 0)
-        {
-            getcwd(server->pwd, MAXPATHLEN);
-            ft_putstr("Server CWD: ");
-            ft_putendl(server->pwd);
-            send(fd, "SUCCESS", ft_strlen("SUCCESS"), 0);
-        }
-        else
-            send(fd, "ERROR", ft_strlen("ERROR"), 0);
-    }
-}
-#endif
-
-void    parse_cd(int fd, t_server *server, char **store)
-{
-    if ((ft_strcmp(store[0], "cd\n") == 0) || (ft_strcmp(store[1], "/\n") == 0))
-        cd_cd_slash(fd, server);
-    else if (ft_strcmp(store[1], "..\n") == 0)
-        cd_dot_dot(fd, server);
-    // else if cd_folder(buff, fd, server, store);
-}
-
-void clear_buff(char *buf, int size)
-{
-    int i;
-
-    i = 0;
-    while(i < size)
-    {
-        buf[i] = '\0';
-        i++;
-    }
-}
-
 void get_from_client(t_server *server, int fd)
 {
     char buff[2048];
     char **store;
 
     // receive what the client sent you
-    while((server->ret_recv = recv(fd, buff, sizeof(buff) - 1, 0)) <= 0);
+    while ((server->ret_recv = recv(fd, buff, sizeof(buff) - 1, 0)) <= 0)
+        ;
     printf("Bytes received: %d\n", server->ret_recv);
     buff[server->ret_recv] = '\0';
     store = ft_strsplit(buff, ' ');
-    // ft_putstr(store[0]);
-    // ft_putchar('\n');
-    // ft_putstr(store[1]);
     printf("Client command: %s\n", buff);
 
     // parse it -TODO-
@@ -123,7 +44,7 @@ void server_loop(t_server *server)
     int cli_fd;
     struct sockaddr_in cli_addr;
     socklen_t addr_len;
-    int in_client; 
+    int in_client;
 
     listen(server->server_socket, 10);
     in_client = 1;
@@ -133,12 +54,12 @@ void server_loop(t_server *server)
         if ((cli_fd = accept(server->server_socket, (struct sockaddr *)&cli_addr, &addr_len)) < 0)
             error("Couldn't accept connection.\n");
         printf("Connection accepted.\n\n");
-        // FORK 
+        // FORK
         // run in a loop to recv from client
         if (fork() == 0)
         {
             ft_putendl("Forking for client");
-            while(in_client)
+            while (in_client)
                 get_from_client(server, cli_fd);
         }
     }
