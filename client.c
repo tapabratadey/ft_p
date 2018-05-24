@@ -25,7 +25,7 @@ void    recv_from_server(t_client *client, char *buff)
 void    open_read(int fd, char **store, t_client *client)
 {
     int ret;
-    char buff[2];
+    char buff[1024];
     char *new_line;
     char *file;
     char *old_line;
@@ -40,14 +40,8 @@ void    open_read(int fd, char **store, t_client *client)
     ft_strncpy(file, store[1], i);
     if ((fd = open(file, O_RDONLY)) < 0)
         error("Couldn't open file.\n");
-    while ((ret = read(fd, buff, 1)) > 0)
-    {
-        buff[1] = '\0';
-        old_line = new_line;
-        new_line = ft_strjoin(new_line, buff);
-        free(old_line);
-    }
-    send(client->client_socket, new_line, ft_strlen(new_line), 0);
+    while ((ret = read(fd, buff, 1024)) > 0)
+        send(client->client_socket, buff, ret, 0);
 }
 
 void client_call(t_client *client)
