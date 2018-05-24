@@ -21,6 +21,8 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/param.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <string.h>
 #include <errno.h>
 #include "libft/libft.h"

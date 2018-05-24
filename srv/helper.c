@@ -34,10 +34,10 @@ void    error_cases(char **store, int fd)
 {
     if ((ft_strcmp(store[0], "ls\n") != 0) &&
     (ft_strcmp(store[0], "pwd\n") != 0) && (ft_strncmp(store[0], "cd", 2) != 0)
-    && (ft_strncmp(store[0], "get", 3) != 0) && (ft_strncmp(store[0], "put", 3) != 0))
+    && (ft_strcmp(store[0], "get\n") != 0) && (ft_strcmp(store[0], "put\n") != 0))
         send(fd, "Wrong Command.", ft_strlen("Wrong Command."), 0);
-    else if ((ft_strncmp(store[0], "get", 3) == 0) && store[1] == NULL)
+    else if ((ft_strcmp(store[0], "get\n") == 0) && store[1] == NULL)
         send(fd, "Usage: get <file>", ft_strlen("Usage: get <file>"), 0);
-    else if ((ft_strncmp(store[0], "put", 3) == 0) && store[1] == NULL)
+    else if ((ft_strcmp(store[0], "put\n") == 0) && store[1] == NULL)
         send(fd, "Usage: put <file>", ft_strlen("Usage: put <file>"), 0);
 }

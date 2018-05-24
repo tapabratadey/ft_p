@@ -12,58 +12,100 @@
 
 #include "server.h"
 
-// void    if_get(fd)
-// {
-// }
-
 #if 0
 client sends file-server recvs file (put)
 client asks for file-server sends file (get)
 #endif
 
-#if 0
 void    if_put(int fd, char **store)
 {
-    int fd;
     int ret;
-    char buff[2];
+    char buff[2048];
+    char *file;
+    int fd_open;
 
-    fd = 0;
+    fd_open = 0;
     ret = 0;
     file = store[1];
-    fd = open(file, O_RDONLY);
-    while ((ret = read(fd, buff, 1) > 0)
+    fd_open = open(file, O_WRONLY | O_TRUNC | O_CREAT, 0777);
+    #if 0
+    ret = recv(fd, buff, sizeof(buff), 0);
+    ft_putnbr(ret);
+    ft_putstr(buff);
+    write(fd_open, buff, ret);
+    #endif
+    ft_putstr("hello");
+    while ((ret = recv(fd, buff, sizeof(buff), 0)) > 0)
     {
-        buff[1] = '\0';
-        old_line = line;
-        line = ft_strjoin(line, buff);
-        free(old_line);
+        write (fd_open, buff, ret);
+            break;
     }
-    send(fd, )
-    
+    send(fd, "SUCCESS", ft_strlen("SUCCESS"), 0);
+
+    #if 0
+    int ret;
+    char buff[2048];
+    char *file;
+    int fd_open;
+
+    fd_open = 0;
+    ret = 0;
+    file = store[1];
+    fd_open = open(file, O_WRONLY | O_TRUNC | O_CREAT, 0777);
+    while ((ret = recv(fd, buff, sizeof(buff), 0)) > 0)
+    {
+        ft_putstr("hello");
+        write (fd_open, buff, ret);
+    }
+    ft_putstr("hellosklsllksfl");
+    send(fd, "SUCCESS", ft_strlen("SUCCESS"), 0);
+    #endif
+    #if 0
+    int ret;
+    char buff[2048];
+    char *file;
+    int fd_open;
+    off_t i;
+    off_t file_size;
+
+    i = 0;
+    fd_open = 0;
+    ret = 0;
+    file = store[1];
+    fd_open = open(file, O_WRONLY | O_TRUNC | O_CREAT, 0777);
+    //recv the file size
+    recv(fd, &file_size, sizeof(file_size), 0);
+    printf("file_size: %d", file_size);
+    while (i < file_size)
+    {
+        ret = recv(fd, buff, 2048, 0);
+        ft_putstr("hello");
+        if (ret <= 0)
+            break;
+        write (fd_open, buff, ret);
+        i += ret;
+    }
+    // send(fd, "SUCCESS", ft_strlen("SUCCESS"), 0);
+    #endif
 }
-#endif
-
-
-
 
 void get_from_client(t_server *server, int fd)
 {
     char buff[2048];
     char **store;
-    char *file;
-
+    ft_putstr("COMMMMM");
     // receive what the client sent you
     while ((server->ret_recv = recv(fd, buff, sizeof(buff) - 1, 0)) <= 0)
         ;
+    ft_putstr("ONNNN");
     printf("Bytes received: %d\n", server->ret_recv);
     buff[server->ret_recv] = '\0';
     store = ft_strsplit(buff, ' ');
-    file = ft_strdup(store[1]);
-    // write (fd, &file, ft_strlen(file));
     printf("Client command: %s\n", buff);
-    error_cases(store, fd);
-
+    if ((ft_strcmp(store[0], "put") == 0) && store[1] != NULL)
+        if_put(fd, store);
+    else
+        error_cases(store, fd);
     // parse it -TODO-
     getcwd(server->pwd, MAXPATHLEN);
     if ((ft_strcmp(store[0], "cd") == 0) || (ft_strcmp(store[0], "cd\n") == 0))
@@ -74,8 +116,6 @@ void get_from_client(t_server *server, int fd)
         if_ls(fd);
     // else if (ft_strcmp(store[0], "get") == 0)
     //     if_get(fd);
-    // else if (ft_strcmp(store[0], "put") == 0)
-    //     if_put(fd, store);
     ft_putstr("Done with child.\n");
 
     //empty the buffer out
@@ -104,7 +144,11 @@ void server_loop(t_server *server)
         {
             ft_putendl("Forking for client");
             while (in_client)
+            {
+                ft_putstr("\nTAAAPPAA\n");
                 get_from_client(server, cli_fd);
+                ft_putstr("HAHAHAHAHAHHA\n");
+            }
         }
     }
 }
