@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   if_cd.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: tadey <marvin@42.fr>                       +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2018/05/23 14:03:11 by tadey             #+#    #+#             */
+/*   Updated: 2018/05/23 14:03:12 by tadey            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../server.h"
 
 void cd_dot_dot(int fd, t_server *server)
@@ -5,7 +17,7 @@ void cd_dot_dot(int fd, t_server *server)
     // cd .. change dir
     char *to_client;
 
-    to_client = "Cannot change from root directory.\n";
+    to_client = "Cannot change from root directory.\nERROR";
     if (ft_strcmp(server->pwd, "/nfs/2017/t/tadey/ft_p") == 0)
         send(fd, to_client, ft_strlen(to_client), 0);
     else
@@ -53,10 +65,7 @@ void cd_folder(int fd, t_server *server, char **store)
         send(fd, "SUCCESS", ft_strlen("SUCCESS"), 0);
     }
     else
-    {
-        send(fd, "Not a directory.\n", ft_strlen("Not a directory.\n"), 0);
-        send(fd, "ERROR", ft_strlen("ERROR"), 0);
-    }
+        send(fd, "Not a directory.\nERROR", ft_strlen("Not a directory.\nERROR"), 0);
 }
 
 void parse_cd(int fd, t_server *server, char **store)
