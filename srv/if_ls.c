@@ -22,8 +22,8 @@ void if_ls(int fd)
         close(2);
         dup2(fd, 1);
         dup2(fd, 2);
-    execl("/bin/ls", "ls", 0);
-    exit(0);
+        execl("/bin/ls", "ls", 0);
+        exit(0);
     }
 
     wait(NULL);

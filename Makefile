@@ -26,6 +26,7 @@ $(SERVER):
 
 $(CLIENT):
 	$(CC) -g $(FLAGS) $(LIBFT) client.c $(CLI) -o $(CLIENT)
+	mv client client_env
 
 fclean:
 	rm -f $(SERVER) $(CLIENT)

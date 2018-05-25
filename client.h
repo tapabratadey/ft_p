@@ -42,4 +42,6 @@ char    *read_user(char *line);
 void    if_quit(t_client *client, char *line);
 void    clear_buff(char *buf, int size);
 void    client_call(t_client *client);
+void    store_file(char **store);
+void    open_read(int fd, char **store, t_client *client);
 #endif
