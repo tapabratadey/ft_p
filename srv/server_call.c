@@ -37,7 +37,6 @@ void	parsing(char **store, int fd, t_server *server, char *buff)
 		if_ls(fd);
 	else
 		error_cases(store, fd);
-	ft_putstr("Done with child.\n");
 }
 
 void	get_from_client(t_server *server, int fd)
@@ -50,6 +49,7 @@ void	get_from_client(t_server *server, int fd)
 	recv_from_client(fd, server, buff);
 	store = ft_strsplit(buff, ' ');
 	parsing(store, fd, server, buff);
+	free_array((void**)store);
 	ft_putstr("Done with child.\n");
 	clear_buff(buff, 4096);
 }
