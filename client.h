@@ -45,7 +45,7 @@ void			clear_buff(char *buf, int size);
 void			client_call(t_client *client);
 int				store_file(char **store);
 void			open_read(int fd, char **store, t_client *client);
-void			save_file(char **store, t_client *client, int fd, int ret);
+void			save_file(char **store, t_client *client, int *fd, int ret);
 void			make_file(char **store, int ret, char *buff);
 void			send_to_srv_for_put(char **store, int flag, t_client *client);
 void			open_read_send_for_put(t_client *client);

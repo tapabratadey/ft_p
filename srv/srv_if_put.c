@@ -36,48 +36,23 @@ void	if_put(int fd, char **store)
 	int		fd_open;
 	int		ret_empty;
 	off_t	file_len;
-	off_t	nb_rxb;
-	// char	*line;
-	// char	*old_line;
+	off_t	bytes_read;
 
-	// line = (char *)malloc(sizeof(char*));
+	bytes_read = 0;
 	ret_empty = 0;
 	fd_open = 0;
 	ret = 0;
 	if_put_helper(store, &fd_open, fd);
 	recv(fd, &file_len, sizeof (off_t), 0);
-
-	for (nb_rxb = 0; nb_rxb < file_len; nb_rxb += ret)
+	while (bytes_read < file_len)
 	{
-		ret = recv(fd, buff, sizeof (buff), 0);
-		if (ret <= 0)
+		if ((ret = recv(fd, buff, sizeof (buff), 0)) <= 0)
 		{
 			ft_putstr("fucking error\n");
 			break;
 		}
 		write(fd_open, buff, ret);
+		bytes_read += ret;
 	}
-	close(fd_open);
-
-#if 0
-	while ((ret = recv(fd, buff, 4096, 0)) >= 0)
-	{
-		buff[ret] = '\0';
-		if ((ft_strcmp(buff, "empty")) == 0)
-		{
-			send(fd, "SUCCESS", ft_strlen("SUCCESS"), 0);
-			clear_buff(buff, 4096);
-			return ;
-		}
-		#if 0
-		old_line = line;
-		line = ft_strjoin(line, buff);
-		free(old_line);
-		#endif
-		if (ret < 4096)
-			break ;
-		write(fd_open, buff, ret);
-	}
-#endif
 	send(fd, "SUCCESS", ft_strlen("SUCCESS"), 0);
 }

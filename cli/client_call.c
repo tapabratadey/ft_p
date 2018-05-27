@@ -38,7 +38,7 @@ void	send_to_srv_for_get(char **store, t_client *client)
 	fd = 0;
 	ret = 0;
 	if (ft_strcmp(store[0], "get") == 0)
-		save_file(store, client, fd, ret);
+		save_file(store, client, &fd, ret);
 }
 
 void	parse_cmd(char *line, int flag, t_client *client, char **store)

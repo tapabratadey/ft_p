@@ -12,6 +12,7 @@
 
 #include "../client.h"
 
+#if 0
 void	cut_new_line_get(char **store, char **file)
 {
 	int i;
@@ -85,4 +86,52 @@ void	save_file(char **store, t_client *client, int fd, int ret)
 		}
 		clear_buff(buff, 4096);
 	}
+}
+
+#endif
+void	if_put_helper(char **store, int *fd)
+{
+	int		i;
+	char	*file;
+
+	i = 0;
+	while (store[1][i] && store[1][i] != '\n')
+		i++;
+	file = ft_strnew(i);
+	ft_strncpy(file, store[1], i);
+	if ((*fd = open(file, O_WRONLY | O_TRUNC | O_CREAT, 0777)) <= 0)
+	{
+		ft_putstr("fucking error.\n");
+		return ;
+	}
+}
+
+void	save_file(char **store, t_client *client, int *fd, int ret)
+{
+	// int		ret;
+	char	buff[4096];
+	int		ret_empty;
+	off_t	file_len;
+	off_t	bytes_read;
+
+	bytes_read = 0;
+	ret_empty = 0;
+
+	ret = 0;
+	if_put_helper(store, &fd);
+	recv(client->client_socket, &file_len, sizeof (off_t), 0);
+	ft_putstr("tapa\n");
+	printf("file_len: %lld", file_len);
+	while (bytes_read < file_len)
+	{
+		if ((ret = recv(client->client_socket, buff, sizeof (buff), 0)) <= 0)
+		{
+			ft_putstr("fuckin error\n");
+			break;
+		}
+		ft_putstr(buff);
+		write(fd, buff, ret);
+		bytes_read += ret;
+	}
+	send(fd, "SUCCESS", ft_strlen("SUCCESS"), 0);
 }

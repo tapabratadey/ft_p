@@ -26,10 +26,13 @@ void	cut_new_line(char **store, char **file)
 int		read_loop(int *ret, int *fd_open, int *counter, int fd)
 {
 	char buff[4096];
-
+	struct stat	st;
+	counter = 0;
+	fstat(fd, &st);
+	send(fd, &st.st_size, sizeof(off_t), 0);
 	while ((*ret = read(*fd_open, buff, 4096)) > 0)
 	{
-		counter++;
+		// counter++;
 		buff[*ret] = '\0';
 		send(fd, buff, *ret, 0);
 		return (0);
@@ -53,9 +56,9 @@ void	if_get(int fd, char **store)
 		ft_strlen("Couldn't open file.\n"), 0);
 	if ((read_loop(&ret, &fd_open, &counter, fd)) == 0)
 		return ;
-	if (ret == 0 && counter == 0)
-	{
-		send(fd, "Fuck empty files.", ft_strlen("Fuck empty files."), 0);
-		return ;
-	}
+	// if (ret == 0 && counter == 0)
+	// {
+	// 	send(fd, "Fuck empty files.", ft_strlen("Fuck empty files."), 0);
+	// 	return ;
+	// }
 }
