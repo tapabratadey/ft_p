@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../client.h"
+#include "../inc/client.h"
 
 void	prompts(char **line, char ***store, t_client *client)
 {

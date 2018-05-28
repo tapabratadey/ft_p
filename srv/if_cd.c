@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../server.h"
+#include "../inc/server.h"
 
 void	cd_dot_dot(int fd, t_server *server)
 {

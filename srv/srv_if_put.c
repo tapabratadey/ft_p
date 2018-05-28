@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../server.h"
+#include "../inc/server.h"
 
 void	if_put_helper(char **store, int *fd_open, int fd)
 {

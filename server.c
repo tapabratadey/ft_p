@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "server.h"
+#include "inc/server.h"
 
 void	server_loop(t_server *server)
 {

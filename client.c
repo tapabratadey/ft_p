@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "client.h"
+#include "inc/client.h"
 
 void	recv_from_server(t_client *client, char *buff)
 {

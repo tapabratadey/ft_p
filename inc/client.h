@@ -24,7 +24,7 @@
 # include <fcntl.h>
 # include <string.h>
 # include <errno.h>
-# include "libft/libft.h"
+# include "../libft/libft.h"
 
 typedef struct	s_client
 {

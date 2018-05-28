@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../client.h"
+#include "../inc/client.h"
 
 int		empty_file(char *buff, int fd, char **store)
 {

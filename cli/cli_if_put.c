@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../client.h"
+#include "../inc/client.h"
 #include <sys/stat.h>
 
 void	cut_new_line_put(char **store, t_client *client)
