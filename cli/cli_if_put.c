@@ -11,7 +11,6 @@
 /* ************************************************************************** */
 
 #include "../client.h"
-
 #include <sys/stat.h>
 
 void	cut_new_line_put(char **store, t_client *client)
@@ -43,15 +42,11 @@ int		check_file_present_empty_for_put(char **store, t_client *client)
 
 void	open_read_send_for_put(t_client *client)
 {
-	int		fd;
-	char	buff[4096];
-	int		ret;
-	int			fd_empty;
+	int			fd;
+	char		buff[4096];
+	int			ret;
 	struct stat	st;
 
-
-
-	fd_empty = 0;
 	ret = 0;
 	fd = 0;
 	if ((fd = open(client->file, O_RDONLY)) < 0)
@@ -62,7 +57,7 @@ void	open_read_send_for_put(t_client *client)
 	else
 	{
 		fstat(fd, &st);
-		send(client->client_socket, &st.st_size, sizeof (off_t), 0);
+		send(client->client_socket, &st.st_size, sizeof(off_t), 0);
 		while ((ret = read(fd, buff, 4096)) > 0)
 			send(client->client_socket, buff, ret, 0);
 	}

@@ -35,6 +35,8 @@ typedef struct		s_server
 	char	*pwd;
 	char	*if_ls;
 	char	*read_buff;
+	off_t	file_len;
+	off_t	bytes_read;
 }					t_server;
 
 void				server_loop(t_server *server);
@@ -46,7 +48,7 @@ void				create_client_server(t_server *server);
 void				parse_cd(int fd, t_server *server, char **store);
 void				clear_buff(char *buf, int size);
 void				error_cases(char **store, int fd);
-void				if_put(int fd, char **store);
+void				if_put(int fd, char **store, t_server *server);
 void				if_get(int fd, char **store);
 void				get_from_client(t_server *server, int fd);
 #endif

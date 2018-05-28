@@ -23,19 +23,18 @@ void	cut_new_line(char **store, char **file)
 	ft_strncpy(*file, store[1], i);
 }
 
-int		read_loop(int *ret, int *fd_open, int *counter, int fd)
+int		read_loop(int *fd_open, int *counter, int fd, int *ret)
 {
-	char buff[4096];
-	struct stat	st;
+	char	buff[4096];
+	int		fd_stat;
+
+	fd_stat = 0;
 	counter = 0;
-	fstat(fd, &st);
-	send(fd, &st.st_size, sizeof(off_t), 0);
 	while ((*ret = read(*fd_open, buff, 4096)) > 0)
 	{
-		// counter++;
-		buff[*ret] = '\0';
 		send(fd, buff, *ret, 0);
-		return (0);
+		if (*ret < 4096)
+			return (0);
 	}
 	return (1);
 }
@@ -44,21 +43,21 @@ void	if_get(int fd, char **store)
 {
 	char	*file;
 	int		fd_open;
-	int		ret;
 	int		counter;
+	int		ret;
 
+	ret = 0;
 	counter = 0;
 	fd_open = 0;
 	file = NULL;
 	cut_new_line(store, &file);
 	if ((fd_open = open(file, O_RDONLY)) < 0)
+	{
 		send(fd, "Couldn't open file.\n",
 		ft_strlen("Couldn't open file.\n"), 0);
-	if ((read_loop(&ret, &fd_open, &counter, fd)) == 0)
 		return ;
-	// if (ret == 0 && counter == 0)
-	// {
-	// 	send(fd, "Fuck empty files.", ft_strlen("Fuck empty files."), 0);
-	// 	return ;
-	// }
+	}
+	else if ((read_loop(&fd_open, &counter, fd, &ret)) == 0)
+		return ;
+	send(fd, "Fuck empty files.", ft_strlen("Fuck empty files."), 0);
 }

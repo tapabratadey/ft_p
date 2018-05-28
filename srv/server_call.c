@@ -25,7 +25,7 @@ void	parsing(char **store, int fd, t_server *server, char *buff)
 {
 	getcwd(server->pwd, MAXPATHLEN);
 	if ((ft_strcmp(store[0], "put") == 0) && store[1] != NULL)
-		if_put(fd, store);
+		if_put(fd, store, server);
 	else if ((ft_strcmp(store[0], "get") == 0) && store[1] != NULL)
 		if_get(fd, store);
 	else if ((ft_strcmp(store[0], "cd") == 0) ||

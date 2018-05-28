@@ -29,30 +29,28 @@ void	if_put_helper(char **store, int *fd_open, int fd)
 	}
 }
 
-void	if_put(int fd, char **store)
+void	if_put(int fd, char **store, t_server *server)
 {
 	int		ret;
 	char	buff[4096];
 	int		fd_open;
 	int		ret_empty;
-	off_t	file_len;
-	off_t	bytes_read;
 
-	bytes_read = 0;
+	server->bytes_read = 0;
 	ret_empty = 0;
 	fd_open = 0;
 	ret = 0;
 	if_put_helper(store, &fd_open, fd);
-	recv(fd, &file_len, sizeof (off_t), 0);
-	while (bytes_read < file_len)
+	recv(fd, &server->file_len, sizeof(off_t), 0);
+	while (server->bytes_read < server->file_len)
 	{
-		if ((ret = recv(fd, buff, sizeof (buff), 0)) <= 0)
+		if ((ret = recv(fd, buff, sizeof(buff), 0)) <= 0)
 		{
 			ft_putstr("fucking error\n");
-			break;
+			break ;
 		}
 		write(fd_open, buff, ret);
-		bytes_read += ret;
+		server->bytes_read += ret;
 	}
 	send(fd, "SUCCESS", ft_strlen("SUCCESS"), 0);
 }
