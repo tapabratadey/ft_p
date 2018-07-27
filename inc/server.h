@@ -37,6 +37,7 @@ typedef struct		s_server
 	char	*read_buff;
 	off_t	file_len;
 	off_t	bytes_read;
+	char	*root;
 }					t_server;
 
 void				server_loop(t_server *server);
@@ -51,4 +52,5 @@ void				error_cases(char **store, int fd);
 void				if_put(int fd, char **store, t_server *server);
 void				if_get(int fd, char **store);
 void				get_from_client(t_server *server, int fd);
+char				*getdir();
 #endif

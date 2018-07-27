@@ -12,6 +12,15 @@
 
 #include "../inc/server.h"
 
+char	*getdir()
+{
+	char *current_cwd;
+
+	current_cwd = NULL;
+	current_cwd = getcwd(current_cwd, MAXPATHLEN);
+	return (current_cwd);
+}
+
 void	if_pwd(int fd)
 {
 	char *current_cwd;

@@ -28,6 +28,8 @@ void	server_loop(t_server *server)
 		(struct sockaddr *)&cli_addr, &addr_len)) < 0)
 			error("Couldn't accept connection.\n");
 		printf("Connection accepted.\n\n");
+		server->root = getdir();
+		printf ("dir: %s\n", server->root);
 		if (fork() == 0)
 		{
 			ft_putendl("Forking for client");
