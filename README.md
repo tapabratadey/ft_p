@@ -1,5 +1,7 @@
 # ft_p
 
+![DEMO](https://user-images.githubusercontent.com/12387917/43361269-8012bd90-927f-11e8-8f57-d446db303e86.gif)
+
 Instructions on how to run it:</br>
 git clone https://github.com/tapabratadey/ft_p.git && cd ft_p && sh run.sh</br></br>
 To run the program:</br></br>
